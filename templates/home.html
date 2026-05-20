@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- HERO SECTION WITH ANIMATED GRADIENT -->
+<section class="hero-section">
+    <div class="hero-content">
+        <div class="hero-badge">🚀 AI-Powered Shopping</div>
+        <h1 class="hero-title">Find Your Best Deal<br><span class="gradient-text">in Seconds</span></h1>
+        <p class="hero-subtitle">Compare prices across 1000+ stores. Get instant alternatives. Save up to 40% average.</p>
+        
+        <form class="hero-search-form" action="/results/" method="get">
+            <div class="search-input-group">
+                <input 
+                    type="text" 
+                    name="q" 
+                    placeholder="Search any product (e.g., iPhone 15, Sony Headphones)" 
+                    list="global-search-suggestions" 
+                    data-autocomplete-list="global-search-suggestions" 
+                    data-autocomplete-endpoint="/api/autocomplete/" 
+                    required>
+                <button type="submit" class="btn-search">🔍 Search</button>
+            </div>
+            <div class="search-filters">
+                <input type="text" name="category" placeholder="Category (optional)">
+                <input type="text" name="brand" placeholder="Brand (optional)">
+            </div>
+            <datalist id="global-search-suggestions"></datalist>
+        </form>
+
+        <div class="hero-social-proof">
+            <div class="proof-stat">
+                <strong>{{ total_products|default:"500+" }}</strong>
+                <small>Products tracked</small>
+            </div>
+            <div class="proof-stat">
+                <strong>{{ average_savings|default:"42%" }}</strong>
+                <small>Average savings</small>
+            </div>
+            <div class="proof-stat">
+                <strong>{{ user_count|default:"50K+" }}</strong>
+                <small>Smart shoppers</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-image">
+        <div class="floating-card card-1">
+            <div class="card-badge">💎 Best Deal</div>
+            <p class="card-price">$299.99</p>
+            <p class="card-store">Amazon</p>
+        </div>
+        <div class="floating-card card-2">
+            <div class="card-badge">⚡ Trending</div>
+            <p class="card-price">4.8★</p>
+            <p class="card-store">Top Rated</p>
+        </div>
+        <div class="floating-card card-3">
+            <div class="card-badge">💰 Save 40%</div>
+            <p class="card-price">+2,450</p>
+            <p class="card-store">Users today</p>
+        </div>
+    </div>
+</section>
+
+<!-- STATS SECTION -->
+<section class="stats-section">
+    <div class="stat-box">
+        <h3 class="stat-number">{{ total_products|default:"500+" }}</h3>
+        <p>Products in our database</p>
+    </div>
+    <div class="stat-box">
+        <h3 class="stat-number">{{ update_frequency|default:"24/7" }}</h3>
+        <p>Real-time price updates</p>
+    </div>
+    <div class="stat-box">
+        <h3 class="stat-number">{{ comparison_speed|default:"<1s" }}</h3>
+        <p>Average comparison time</p>
+    </div>
+    <div class="stat-box">
+        <h3 class="stat-number">{{ user_count|default:"50K+" }}</h3>
+        <p>Active users worldwide</p>
+    </div>
+</section>
+
+<!-- FEATURED PRODUCTS SECTION -->
+<section class="featured-section">
+    <div class="section-header">
+        <div>
+            <h2>🌟 Trending Now</h2>
+            <p>Handpicked deals featured today</p>
+        </div>
+        <a href="/results/" class="btn-secondary">View All →</a>
+    </div>
+    <div class="card-grid">
+        {% for product in featured_products %}
+            <article class="product-card featured-card">
+                <div class="product-image-wrap">
+                    {% if product.image_url %}
+                        <img src="{{ product.get_image_url }}" srcset="{{ product.get_image_srcset }}" alt="{{ product.name }}" class="product-image" loading="lazy" decoding="async" sizes="(max-width: 600px) 100vw, 300px">
+                    {% else %}
+                        <div class="product-image-placeholder">📦</div>
+                    {% endif %}
+                    <div class="product-badge">Hot Deal</div>
+                </div>
+                <div class="product-content">
+                    <p class="card-category">{{ product.category }}</p>
+                    <h3>{{ product.name }}</h3>
+                    <p class="card-brand">by {{ product.brand }}</p>
+                    <div class="price-section">
+                        {% if product.cheapest_price %}
+                            <p class="price-label">From <span class="price-highlight">${{ product.cheapest_price }}</span></p>
+                            <p class="price-platform">on <strong>{{ product.cheapest_platform }}</strong></p>
+                        {% else %}
+                            <p class="price-label">Price unavailable</p>
+                        {% endif %}
+                    </div>
+                    <a class="btn-primary" href="/products/{{ product.id }}/">Compare Prices →</a>
+                </div>
+            </article>
+        {% empty %}
+            <p class="empty-state">No products yet. Check back soon!</p>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- HOW IT WORKS SECTION -->
+<section class="how-works-section">
+    <h2>How SmartSaver Works</h2>
+    <div class="process-grid">
+        <div class="process-card">
+            <div class="process-number">1</div>
+            <h3>Search Any Product</h3>
+            <p>Type the product you're looking for. Our AI instantly recognizes items across brands.</p>
+        </div>
+        <div class="process-card">
+            <div class="process-number">2</div>
+            <h3>Compare Prices</h3>
+            <p>See prices from 100+ stores side-by-side with real-time updates and availability status.</p>
+        </div>
+        <div class="process-card">
+            <div class="process-number">3</div>
+            <h3>Find Alternatives</h3>
+            <p>Discover smarter products with better specs at lower prices from AI recommendations.</p>
+        </div>
+        <div class="process-card">
+            <div class="process-number">4</div>
+            <h3>Save & Track</h3>
+            <p>Set price alerts, save products, and get notified when deals drop in your wishlist.</p>
+        </div>
+    </div>
+</section>
+
+<!-- DAILY NEWS SECTION -->
+<section class="news-section">
+    <div class="section-header">
+        <div>
+            <h2>📰 Daily News</h2>
+            <p>Latest product launches and price changes</p>
+        </div>
+        <a href="/news/" class="btn-secondary">Read All →</a>
+    </div>
+    <div class="news-grid">
+        {% for item in latest_news %}
+            <article class="news-card">
+                <div class="news-image-wrap">
+                    <img src="{{ item.get_image_url }}" srcset="{{ item.get_image_srcset }}" sizes="(max-width:900px) 100vw, 420px" alt="{{ item.title }}" class="news-image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/static/smartsaver/news-general.svg';">
+                    <span class="news-badge">{{ item.news_category|title }}</span>
+                </div>
+                <div class="news-content">
+                    <p class="news-date">📅 {{ item.published_at|date:"M d, Y" }}</p>
+                    <h3>{{ item.title }}</h3>
+                    <p class="news-summary">{{ item.summary|truncatechars:120 }}</p>
+                    <a class="btn-outline" href="/news/{{ item.slug }}/">Read Full Story →</a>
+                </div>
+            </article>
+        {% empty %}
+            <p class="empty-state">No news yet. Stay tuned!</p>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- FAQ SECTION -->
+<section class="faq-section">
+    <h2>❓ Frequently Asked Questions</h2>
+    <div class="faq-grid">
+        {% for faq in faqs %}
+            <div class="faq-card">
+                <details class="faq-item">
+                    <summary class="faq-question">{{ faq.question }}</summary>
+                    <div class="faq-answer">{{ faq.answer }}</div>
+                </details>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- FINAL CTA SECTION -->
+<section class="cta-section">
+    <div class="cta-content">
+        <h2>Start Saving Today</h2>
+        <p>Join 50,000+ smart shoppers who save an average of 40% with SmartSaver</p>
+        <div class="cta-buttons">
+            <a href="/results/" class="btn-primary btn-lg">Begin Shopping →</a>
+            <a href="/accounts/login/" class="btn-secondary btn-lg">Create Free Account</a>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('in-view');
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.stat-box, .process-card, .news-card, .faq-card').forEach(el => {
+        observer.observe(el);
+    });
+
+    // FAQ toggle
+    document.querySelectorAll('.faq-item').forEach(item => {
+        item.addEventListener('toggle', function() {
+            document.querySelectorAll('.faq-item[open]').forEach(openItem => {
+                if (openItem !== item) openItem.removeAttribute('open');
+            });
+        });
+    });
+</script>
+
+{% endblock %}

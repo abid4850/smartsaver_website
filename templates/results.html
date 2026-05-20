@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="deals-hero">
+    <p class="eyebrow">Browse Deals</p>
+    <h1>Smart deal browser with enterprise-grade filtering</h1>
+    <p class="lead">Scan products across categories, compare by price and platform, and filter up to $100,000 in one place.</p>
+    <div class="deals-hero-stats">
+        <div><strong>{{ total_results }}</strong><span>Matching products</span></div>
+        <div><strong>${{ min_price }}</strong><span>Current minimum</span></div>
+        <div><strong>${{ max_price }}</strong><span>Current maximum</span></div>
+    </div>
+</section>
+
+<section class="filters-panel">
+    <h2>
+        Search results
+        {% if category %}
+            in {{ category }}
+        {% endif %}
+    </h2>
+    <form class="search-form compact" action="/results/" method="get">
+        <input type="text" name="q" placeholder="Search keyword" value="{{ query }}" list="global-search-suggestions" data-autocomplete-list="global-search-suggestions" data-autocomplete-endpoint="/api/autocomplete/">
+        <input type="hidden" name="category" value="{{ category }}">
+        <select name="brand" aria-label="Choose brand">
+            <option value="">All brands</option>
+            {% for item in popular_brands %}
+                <option value="{{ item }}" {% if item == brand %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+        </select>
+        <select name="sort" aria-label="Sort results">
+            <option value="name_asc" {% if sort == "name_asc" %}selected{% endif %}>Name A-Z</option>
+            <option value="name_desc" {% if sort == "name_desc" %}selected{% endif %}>Name Z-A</option>
+            <option value="price_low" {% if sort == "price_low" %}selected{% endif %}>Price low to high</option>
+            <option value="price_high" {% if sort == "price_high" %}selected{% endif %}>Price high to low</option>
+        </select>
+        <select name="per_page" aria-label="Products per page">
+            {% for size in allowed_page_sizes %}
+                <option value="{{ size }}" {% if per_page == size %}selected{% endif %}>{{ size }} / page</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Apply</button>
+        <button type="submit" name="reset_per_page" value="1">Reset Page Size</button>
+
+        <div class="price-range-wrap">
+            <div class="price-range-head">
+                <span>Price range</span>
+                <strong>
+                    $<span id="min-price-label">{{ min_price }}</span>
+                    -
+                    $<span id="max-price-label">{{ max_price }}</span>
+                </strong>
+            </div>
+            <p class="range-help">Range supports up to ${{ price_ceiling }} for premium and luxury products.</p>
+            <div class="range-inputs">
+                <input id="min-price-input" type="range" name="min_price" min="{{ price_floor }}" max="{{ price_ceiling }}" step="1" value="{{ min_price }}">
+                <input id="max-price-input" type="range" name="max_price" min="{{ price_floor }}" max="{{ price_ceiling }}" step="1" value="{{ max_price }}">
+            </div>
+        </div>
+    </form>
+
+    <datalist id="global-search-suggestions"></datalist>
+
+    <section class="saved-filter-box">
+        <div class="section-head compact-head">
+            <h3>Saved filters</h3>
+            {% if request.user.is_authenticated %}
+                <span>{{ saved_filters|length }} saved</span>
+            {% endif %}
+        </div>
+
+        {% if request.user.is_authenticated %}
+            <form class="saved-filter-form" action="/filters/save/" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="query" value="{{ query }}">
+                <input type="hidden" name="category" value="{{ category }}">
+                <input type="hidden" name="brand" value="{{ brand }}">
+                <input type="hidden" name="sort" value="{{ sort }}">
+                <input type="hidden" name="min_price" value="{{ min_price }}">
+                <input type="hidden" name="max_price" value="{{ max_price }}">
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <input type="text" name="name" placeholder="Optional: e.g. Budget Laptops">
+                <button type="submit">Save Current Filter</button>
+            </form>
+
+            {% if saved_filters %}
+                <div class="saved-filter-list">
+                    {% for saved in saved_filters %}
+                        <article class="saved-filter-item">
+                            <div class="saved-filter-title-wrap">
+                                <a href="{{ saved.share_url }}">{{ saved.name }}</a>
+                                {% if saved.is_pinned %}
+                                    <span class="pin-badge">Pinned</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="saved-filter-actions">
+                                <button type="button" class="ghost-button" data-copy-url="{{ saved.share_url }}">Copy Link</button>
+
+                                <form action="/filters/{{ saved.id }}/pin/" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="ghost-button">{% if saved.is_pinned %}Unpin{% else %}Pin{% endif %}</button>
+                                </form>
+
+                                <form action="/filters/{{ saved.id }}/delete/" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="ghost-button danger">Delete</button>
+                                </form>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% else %}
+            <p>Sign in to save and reuse your custom filter presets.</p>
+            <a class="button-link" href="/accounts/login/?next={{ request.get_full_path|urlencode }}">Login to Save Filters</a>
+        {% endif %}
+    </section>
+
+    <div class="chip-row">
+        <a class="chip {% if not category %}active{% endif %}" href="/results/?q={{ query|urlencode }}&brand={{ brand|urlencode }}&sort={{ sort|urlencode }}&min_price={{ min_price }}&max_price={{ max_price }}&per_page={{ per_page }}">All categories <span class="chip-count">{{ all_categories_total }}</span></a>
+        {% for item in category_totals %}
+            <a class="chip {% if item.name == category %}active{% endif %}" href="/category/{{ item.slug }}/?q={{ query|urlencode }}&brand={{ brand|urlencode }}&sort={{ sort|urlencode }}&min_price={{ min_price }}&max_price={{ max_price }}&per_page={{ per_page }}">{{ item.name }} <span class="chip-count">{{ item.count }}</span></a>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="deals-results-panel">
+    <div class="section-head">
+        <h2>Matching products</h2>
+        <span>{{ total_results }} item{{ total_results|pluralize }}</span>
+    </div>
+
+    <div class="card-grid">
+        {% for product in products %}
+            <article class="product-card">
+                <div class="product-image-wrap">
+                    {% if product.image_url %}
+                        <img src="{{ product.get_image_url }}" srcset="{{ product.get_image_srcset }}" alt="{{ product.name }}" class="product-image" loading="lazy" decoding="async" sizes="(max-width: 600px) 100vw, 300px" onerror="this.onerror=null;this.src='/static/smartsaver/product-placeholder.svg';">
+                    {% else %}
+                        <img src="/static/smartsaver/product-placeholder.svg" alt="{{ product.name }}" class="product-image product-image-fallback" loading="lazy" decoding="async">
+                    {% endif %}
+                </div>
+                <div class="product-content">
+                    <p class="card-category">{{ product.category }}</p>
+                    <h3>{{ product.name }}</h3>
+                    <p class="card-brand">{{ product.brand }}</p>
+                    <p class="price-label">
+                        {% if product.cheapest_price %}
+                            From ${{ product.cheapest_price }} on {{ product.cheapest_platform }}
+                        {% else %}
+                            Price unavailable
+                        {% endif %}
+                    </p>
+                    <a class="button-link" href="/products/{{ product.id }}/">Open Product</a>
+                </div>
+            </article>
+        {% empty %}
+            <article class="product-card">
+                <h3>No products match your filters</h3>
+                <p>Try a broader keyword, or remove strict filters to see the full catalog.</p>
+                <p><a class="button-link" href="/results/">Clear Filters</a></p>
+                {% if popular_categories %}
+                    <p><strong>Popular categories:</strong> {{ popular_categories|join:", " }}</p>
+                {% endif %}
+                {% if popular_brands %}
+                    <p><strong>Popular brands:</strong> {{ popular_brands|join:", " }}</p>
+                {% endif %}
+            </article>
+        {% endfor %}
+    </div>
+
+    {% if page_obj and paginator.num_pages > 1 %}
+        <nav class="pagination" aria-label="Results pages">
+            {% if page_obj.has_previous %}
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{{ pagination_query }}">Previous</a>
+            {% endif %}
+
+            {% for number in paginator.page_range %}
+                {% if number == page_obj.number %}
+                    <span class="page-link active">{{ number }}</span>
+                {% elif number >= page_obj.number|add:"-2" and number <= page_obj.number|add:"2" %}
+                    <a class="page-link" href="?page={{ number }}{{ pagination_query }}">{{ number }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{{ pagination_query }}">Next</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+
+<script>
+    (function () {
+        const minInput = document.getElementById("min-price-input");
+        const maxInput = document.getElementById("max-price-input");
+        const minLabel = document.getElementById("min-price-label");
+        const maxLabel = document.getElementById("max-price-label");
+
+        if (!minInput || !maxInput || !minLabel || !maxLabel) {
+            return;
+        }
+
+        const syncLabels = () => {
+            let minValue = parseInt(minInput.value, 10);
+            let maxValue = parseInt(maxInput.value, 10);
+
+            if (minValue > maxValue) {
+                if (document.activeElement === minInput) {
+                    maxValue = minValue;
+                    maxInput.value = String(maxValue);
+                } else {
+                    minValue = maxValue;
+                    minInput.value = String(minValue);
+                }
+            }
+
+            minLabel.textContent = String(minValue);
+            maxLabel.textContent = String(maxValue);
+        };
+
+        minInput.addEventListener("input", syncLabels);
+        maxInput.addEventListener("input", syncLabels);
+        syncLabels();
+    })();
+</script>
+{% endblock %}

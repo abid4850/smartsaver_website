@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartSaver Deals</title>
+    <meta name="description" content="SmartSaver Deals - promotional product cards with live filtering and price comparison.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --text: #111827;
+            --muted: #6b7280;
+            --accent: #f97316;
+            --accent-dark: #ea580c;
+            --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+            --shadow-hover: 0 24px 70px rgba(15, 23, 42, 0.16);
+            --radius: 20px;
+            --border: rgba(148, 163, 184, 0.2);
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(249, 115, 22, 0.10), transparent 34%),
+                radial-gradient(circle at top right, rgba(59, 130, 246, 0.10), transparent 28%),
+                linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+        }
+
+        .page {
+            max-width: 1480px;
+            margin: 0 auto;
+            padding: 28px 20px 40px;
+        }
+
+        .hero {
+            display: grid;
+            gap: 18px;
+            align-items: end;
+            padding: 28px;
+            margin-bottom: 22px;
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: calc(var(--radius) + 6px);
+            box-shadow: var(--shadow);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            margin: 0;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(249, 115, 22, 0.12);
+            color: var(--accent-dark);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: clamp(2.4rem, 4vw, 4.5rem);
+            line-height: 0.98;
+            letter-spacing: -0.05em;
+        }
+
+        .hero p {
+            max-width: 760px;
+            margin: 0;
+            color: var(--muted);
+            font-size: 1.03rem;
+            line-height: 1.7;
+        }
+
+        .toolbar {
+            display: grid;
+            gap: 14px;
+            margin: 20px 0 24px;
+        }
+
+        .searchbar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+        }
+
+        .searchbar input {
+            width: 100%;
+            min-width: 0;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            font: inherit;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .searchbar input::placeholder { color: #94a3b8; }
+
+        .search-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            color: white;
+            background: linear-gradient(135deg, #111827, #1f2937);
+            flex: 0 0 auto;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.84);
+            color: var(--text);
+            border-radius: 999px;
+            padding: 11px 16px;
+            font: inherit;
+            font-size: 0.93rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 180ms ease, background 180ms ease, color 180ms ease, border-color 180ms ease;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            transform: translateY(-1px);
+            background: #111827;
+            color: #ffffff;
+            border-color: #111827;
+        }
+
+        .meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .product-card {
+            position: relative;
+            overflow: hidden;
+            background: var(--surface);
+            border: 1px solid rgba(226, 232, 240, 0.92);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(249, 115, 22, 0.28);
+        }
+
+        .featured-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #f97316, #fb923c);
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            box-shadow: 0 10px 24px rgba(249, 115, 22, 0.3);
+        }
+
+        .card-top {
+            padding: 14px 14px 0;
+        }
+
+        .color-bar {
+            height: 8px;
+            border-radius: 999px;
+            margin-bottom: 12px;
+        }
+
+        .image-panel {
+            position: relative;
+            aspect-ratio: 4 / 3;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            padding: 18px;
+            transition: transform 240ms ease;
+        }
+
+        .product-card:hover .product-image { transform: scale(1.03); }
+
+        .fallback {
+            display: none;
+            width: 88px;
+            height: 88px;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.38);
+            background: rgba(255, 255, 255, 0.72);
+            color: var(--text);
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 18px 18px 20px;
+            flex: 1;
+        }
+
+        .category {
+            margin: 0;
+            color: var(--accent-dark);
+            font-size: 0.73rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .name {
+            margin: 0;
+            font-size: 1.18rem;
+            line-height: 1.2;
+            letter-spacing: -0.04em;
+        }
+
+        .brand {
+            margin: 0;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+
+        .brand strong { color: #111827; }
+
+        .price-row,
+        .store-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .label {
+            color: #64748b;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .price {
+            color: var(--accent);
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: -0.06em;
+        }
+
+        .store {
+            color: var(--accent-dark);
+            font-weight: 800;
+        }
+
+        .cta {
+            margin-top: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 13px 16px;
+            border-radius: 14px;
+            border: 0;
+            background: #111827;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 800;
+            transition: background 180ms ease, transform 180ms ease;
+        }
+
+        .cta:hover {
+            background: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .empty-state {
+            display: none;
+            grid-column: 1 / -1;
+            padding: 32px;
+            text-align: center;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px dashed rgba(148, 163, 184, 0.4);
+            border-radius: var(--radius);
+        }
+
+        footer {
+            margin-top: 36px;
+            padding: 24px 4px 0;
+            color: #475569;
+        }
+
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            border-top: 1px solid rgba(148, 163, 184, 0.22);
+            padding-top: 18px;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links a {
+            color: inherit;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .footer-links a:hover { color: var(--accent-dark); }
+
+        @media (max-width: 1180px) {
+            .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 680px) {
+            .page { padding: 18px 14px 28px; }
+            .hero { padding: 20px; }
+            .grid { grid-template-columns: 1fr; }
+            .searchbar { padding: 12px; }
+            .meta-row { flex-direction: column; align-items: flex-start; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <section class="hero">
+            <p class="eyebrow">SmartSaver Deals</p>
+            <h1>Promotional products with exact, clean card presentation</h1>
+            <p>Search, filter, and compare featured deals across stores in a card layout designed for merchandising, promotions, and product comparison.</p>
+        </section>
+
+        <section class="toolbar" aria-label="Product filters">
+            <div class="searchbar">
+                <div class="search-icon">⌕</div>
+                <input id="searchInput" type="search" placeholder="Search products, brands, categories, or stores" autocomplete="off" aria-label="Search products">
+            </div>
+
+            <div class="filters" id="filterButtons" role="tablist" aria-label="Category filters">
+                <button type="button" class="filter-btn active" data-filter="All">All</button>
+                <button type="button" class="filter-btn" data-filter="Cameras">Cameras</button>
+                <button type="button" class="filter-btn" data-filter="Laptops">Laptops</button>
+                <button type="button" class="filter-btn" data-filter="Audio">Audio</button>
+                <button type="button" class="filter-btn" data-filter="Monitors">Monitors</button>
+            </div>
+
+            <div class="meta-row">
+                <span id="resultsCount">4 products</span>
+                <span>Live filtering enabled</span>
+            </div>
+        </section>
+
+        <section class="grid" id="productGrid" aria-live="polite"></section>
+
+        <footer>
+            <div class="footer-inner">
+                <strong>SmartSaver Deals</strong>
+                <ul class="footer-links">
+                    <li><a href="https://www.amazon.com" target="_blank" rel="noopener noreferrer">Amazon</a></li>
+                    <li><a href="https://www.ebay.com" target="_blank" rel="noopener noreferrer">eBay</a></li>
+                    <li><a href="https://www.bestbuy.com" target="_blank" rel="noopener noreferrer">Best Buy</a></li>
+                    <li><a href="https://www.newegg.com" target="_blank" rel="noopener noreferrer">Newegg</a></li>
+                </ul>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const products = [
+            {id:1, name:"ARRI ALEXA Mini LF", brand:"ARRI", category:"Cinema Cameras", price:96000.00, store:"eBay", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Arri_Alexa_camera.jpg/330px-Arri_Alexa_camera.jpg", initials:"AA", color:"#e91e63", bgColor:"#fce4ec", hotDeal:true},
+            {id:2, name:"Acer Swift X 14", brand:"Acer", category:"Laptops", price:1175.02, store:"Newegg", image:"https://live.staticflickr.com/65535/51829071266_0832cf53eb_b.jpg", initials:"AS", color:"#2196f3", bgColor:"#e3f2fd", hotDeal:true},
+            {id:3, name:"AirPods Max", brand:"Apple", category:"Headphones", price:527.04, store:"eBay", image:"https://upload.wikimedia.org/wikipedia/commons/7/7e/Apple_airpods_max_1.jpg", initials:"AM", color:"#ff9800", bgColor:"#fff3e0", hotDeal:true},
+            {id:4, name:"Alienware AW3423DW", brand:"Dell", category:"Monitors", price:1273.02, store:"Newegg", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Alienware_AW3423DW_monitor.jpg/512px-Alienware_AW3423DW_monitor.jpg", initials:"AW", color:"#4caf50", bgColor:"#e8f5e9", hotDeal:true}
+        ];
+
+        const state = {
+            filter: 'All',
+            query: ''
+        };
+
+        const grid = document.getElementById('productGrid');
+        const searchInput = document.getElementById('searchInput');
+        const resultsCount = document.getElementById('resultsCount');
+        const buttons = Array.from(document.querySelectorAll('.filter-btn'));
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        function formatPrice(value) {
+            return '$' + Number(value).toFixed(2);
+        }
+
+        function categoryMatch(product, filter) {
+            if (filter === 'All') return true;
+            if (filter === 'Audio') return /audio|headphones|earbuds/i.test(product.category);
+            return product.category.toLowerCase().includes(filter.toLowerCase());
+        }
+
+        function matchesQuery(product, query) {
+            if (!query) return true;
+            const haystack = [product.name, product.brand, product.category, product.store].join(' ').toLowerCase();
+            return haystack.includes(query.toLowerCase());
+        }
+
+        function renderCard(product) {
+            return `
+                <article class="product-card" data-name="${escapeHtml(product.name)}" data-brand="${escapeHtml(product.brand)}" data-category="${escapeHtml(product.category)}" data-store="${escapeHtml(product.store)}">
+                    ${product.hotDeal ? '<div class="featured-badge">HOT DEAL</div>' : ''}
+                    <div class="card-top">
+                        <div class="color-bar" style="background:${product.color};"></div>
+                        <div class="image-panel" style="background:${product.bgColor};">
+                            <img
+                                class="product-image"
+                                src="${escapeHtml(product.image)}"
+                                alt="${escapeHtml(product.name)}"
+                                loading="lazy"
+                                decoding="async"
+                                onerror="this.style.display='none'; const fallback=this.nextElementSibling; if (fallback) fallback.style.display='flex';"
+                            >
+                            <div class="fallback" data-fallback style="background:${product.bgColor}; color:${product.color};">${escapeHtml(product.initials || product.brand.slice(0, 2).toUpperCase())}</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="category">${escapeHtml(product.category)}</p>
+                        <h3 class="name">${escapeHtml(product.name)}</h3>
+                        <p class="brand">by <strong>${escapeHtml(product.brand)}</strong></p>
+                        <div class="price-row">
+                            <span class="label">From</span>
+                            <span class="price">${formatPrice(product.price)}</span>
+                        </div>
+                        <div class="store-row">
+                            <span class="label">on</span>
+                            <span class="store">${escapeHtml(product.store)}</span>
+                        </div>
+                        <a class="cta" href="/products/${product.id}/">Compare Prices</a>
+                    </div>
+                </article>
+            `;
+        }
+
+        function filteredProducts() {
+            return products.filter((product) => categoryMatch(product, state.filter) && matchesQuery(product, state.query));
+        }
+
+        function render() {
+            const items = filteredProducts();
+            resultsCount.textContent = `${items.length} product${items.length === 1 ? '' : 's'}`;
+            grid.innerHTML = items.length
+                ? items.map(renderCard).join('')
+                : '<div class="empty-state" style="display:block;">No products match your filters. Try a broader search.</div>';
+        }
+
+        buttons.forEach((button) => {
+            button.addEventListener('click', () => {
+                buttons.forEach((item) => item.classList.remove('active'));
+                button.classList.add('active');
+                state.filter = button.dataset.filter || 'All';
+                render();
+            });
+        });
+
+        searchInput.addEventListener('input', () => {
+            state.query = searchInput.value.trim();
+            render();
+        });
+
+        render();
+    </script>
+</body>
+</html>

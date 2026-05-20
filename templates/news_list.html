@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-panel news-top-panel">
+    <p class="eyebrow">Editorial</p>
+    <h1>Daily Product News</h1>
+    <p class="lead">Fresh updates on launches, pricing shifts, and product trends from the SmartSaver desk.</p>
+    <form method="get" action="/news/" class="news-search-form">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search news by title, summary, or details">
+        <select name="per_page" aria-label="News per page">
+            {% for size in allowed_page_sizes %}
+                <option value="{{ size }}" {% if per_page == size %}selected{% endif %}>{{ size }} / page</option>
+            {% endfor %}
+        </select>
+        {% if selected_category %}
+            <input type="hidden" name="category" value="{{ selected_category }}">
+        {% endif %}
+        <button type="submit">Search</button>
+        <button type="submit" name="reset_per_page" value="1">Reset Page Size</button>
+    </form>
+</section>
+
+<section>
+    {% if categories %}
+        <div class="category-chips">
+            <a href="/news/?per_page={{ per_page }}" class="chip {% if not selected_category %}active{% endif %}">All News</a>
+            {% for cat in categories %}
+                <a href="/news/?category={{ cat.value }}&per_page={{ per_page }}" class="chip {% if selected_category == cat.value %}active{% endif %}">
+                    {{ cat.label }} <span class="count">({{ cat.count }})</span>
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="news-grid">
+        {% for item in news_items %}
+            <article class="news-card">
+                <div class="news-image-wrap">
+                    <img src="{{ request.scheme }}://{{ request.get_host }}{{ item.get_image_url }}" srcset="{{ item.get_image_srcset }}" sizes="(max-width:900px) 100vw, 420px" alt="{{ item.title }}" class="news-image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/static/smartsaver/news-general.svg';">
+                    <span class="news-badge">{{ item.news_category|title }}</span>
+                </div>
+                <div class="news-content">
+                    <p class="card-category">{{ item.get_news_category_display }} • {{ item.published_at|date:"M d, Y" }}</p>
+                    <h3>{{ item.title }}</h3>
+                    <p class="news-summary">{{ item.summary|truncatechars:120 }}</p>
+                    <a class="btn-outline" href="/news/{{ item.slug }}/">Read Full Story →</a>
+                </div>
+            </article>
+        {% empty %}
+            <article class="news-card">
+                <div>
+                    <h3>No stories yet</h3>
+                    <p>Publish your first update from the backend and it will appear here automatically.</p>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+
+    {% if page_obj and paginator.num_pages > 1 %}
+        <nav class="pagination" aria-label="News pages">
+            {% if page_obj.has_previous %}
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&per_page={{ per_page }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if query %}&q={{ query|urlencode }}{% endif %}">Previous</a>
+            {% endif %}
+            {% for number in paginator.page_range %}
+                {% if number == page_obj.number %}
+                    <span class="page-link active">{{ number }}</span>
+                {% elif number >= page_obj.number|add:"-2" and number <= page_obj.number|add:"2" %}
+                    <a class="page-link" href="?page={{ number }}&per_page={{ per_page }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if query %}&q={{ query|urlencode }}{% endif %}">{{ number }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&per_page={{ per_page }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if query %}&q={{ query|urlencode }}{% endif %}">Next</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

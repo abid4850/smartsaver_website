@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}{{ news_item.title }} | SmartSaver News{% endblock %}
+
+{% block description %}{{ news_item.summary }}{% endblock %}
+
+{% block og_tags %}
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ news_item.title }}">
+    <meta property="og:description" content="{{ news_item.summary }}">
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ news_item.get_image_url }}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:site_name" content="SmartSaver">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ news_item.title }}">
+    <meta name="twitter:description" content="{{ news_item.summary }}">
+    <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ news_item.get_image_url }}">
+    {% if news_item.product %}
+        <meta property="article:tag" content="{{ news_item.product.name }}">
+    {% endif %}
+    <meta property="article:published_time" content="{{ news_item.published_at|date:'c' }}">
+    <meta property="article:modified_time" content="{{ news_item.updated_at|date:'c' }}">
+{% endblock %}
+
+{% block content %}
+<article class="news-detail-panel detail-hero detail-hero-pro">
+    <div class="detail-media">
+        <img class="detail-hero-image" src="{{ news_item.get_image_url }}" srcset="{{ news_item.get_image_srcset }}" sizes="(max-width:900px) 100vw, 420px" alt="{{ news_item.title }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/static/smartsaver/news-general.svg';">
+        <span class="news-badge">{{ news_item.news_category|title }}</span>
+    </div>
+
+    <div class="detail-copy">
+        <p class="card-category">{{ news_item.published_at|date:"M d, Y" }}</p>
+        <h1>{{ news_item.title }}</h1>
+        <p class="lead">{{ news_item.summary }}</p>
+        {% if news_item.body %}
+            <div class="news-body">{{ news_item.body|linebreaks }}</div>
+        {% endif %}
+
+        <div class="detail-quick-stats">
+            <article>
+                <strong>{{ news_item.read_time|default:"3" }}m</strong>
+                <small>Read Time</small>
+            </article>
+            <article>
+                <strong>{{ news_item.views|default:0 }}</strong>
+                <small>Views</small>
+            </article>
+            <article>
+                <strong>{{ news_item.comments_count|default:0 }}</strong>
+                <small>Comments</small>
+            </article>
+        </div>
+    </div>
+
+    <aside class="best-deal-pro">
+        <div class="share-row">
+            <button type="button" class="ghost-button" data-copy-url="/news/{{ news_item.slug }}/">Copy Link</button>
+            <button type="button" class="ghost-button" data-share-title="{{ news_item.title }}" data-share-url="/news/{{ news_item.slug }}/">Share</button>
+            <a class="ghost-button" href="https://x.com/intent/tweet?text={{ news_item.title|urlencode }}&url={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">X</a>
+            <a class="ghost-button" href="https://wa.me/?text={{ news_item.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            {% if edit_url %}
+                <a class="ghost-button" href="{{ edit_url }}">Edit</a>
+            {% endif %}
+        </div>
+
+        {% if news_item.product %}
+            <div class="product-card">
+                <div class="product-image-wrap">
+                    {% if news_item.product.image_url %}
+                        <img class="product-image" src="{{ news_item.product.get_image_url }}" srcset="{{ news_item.product.get_image_srcset }}" alt="{{ news_item.product.name }}" loading="lazy" decoding="async" sizes="(max-width: 600px) 100vw, 300px" onerror="this.onerror=null;this.src='/static/smartsaver/product-placeholder.svg';">
+                    {% else %}
+                        <img class="product-image" src="/static/smartsaver/product-placeholder.svg" alt="{{ news_item.product.name }}">
+                    {% endif %}
+                </div>
+                <div class="product-content">
+                    <p class="card-category">Related</p>
+                    <h3>{{ news_item.product.name }}</h3>
+                    <p class="card-brand">{{ news_item.product.brand }}</p>
+                    <div class="price-section">
+                        <span class="price-label">Starting from</span>
+                        <span class="price-highlight">${{ news_item.product.cheapest_price }}</span>
+                        <a class="btn-primary" href="/products/{{ news_item.product.id }}/">View Product</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </aside>
+</article>
+
+<section>
+    <div class="section-head">
+        <h2>More News</h2>
+        <a href="/news/">View all</a>
+    </div>
+    <div class="news-grid">
+        {% for item in related_news %}
+            <article class="news-card">
+                <div class="news-image-wrap">
+                    <img class="news-image" src="{{ request.scheme }}://{{ request.get_host }}{{ item.get_image_url }}" alt="{{ item.title }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/static/smartsaver/news-general.svg';">
+                    <span class="news-badge">{{ item.news_category|title }}</span>
+                </div>
+                <div class="news-content">
+                    <p class="card-category">{{ item.published_at|date:"M d, Y" }}</p>
+                    <h3>{{ item.title }}</h3>
+                    <p class="news-summary">{{ item.summary|truncatechars:120 }}</p>
+                    <a class="btn-outline" href="/news/{{ item.slug }}/">Read Full Story →</a>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <rect width="1400" height="900" rx="48" fill="#f0fdf4"/>
+  <rect x="120" y="140" width="1160" height="620" rx="42" fill="#ffffff"/>
+  <rect x="320" y="250" width="760" height="300" rx="36" fill="#f97316"/>
+  <text x="700" y="410" text-anchor="middle" font-size="96" font-family="Arial, Helvetica, sans-serif" fill="#ffffff" font-weight="700">DEALS</text>
+  <text x="700" y="730" text-anchor="middle" font-size="44" font-family="Arial, Helvetica, sans-serif" fill="#0f172a" font-weight="700">Big Savings Today</text>
+</svg>

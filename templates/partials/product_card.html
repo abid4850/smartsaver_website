@@ -1,0 +1,26 @@
+<article class="product-card" data-id="{{ product.id }}">
+  {% if product.image_url %}
+    <img src="{{ product.image_url }}"
+         alt="{{ product.name }}"
+         class="product-image"
+         onerror="this.onerror=null; this.src='{{ product.fallback_url }}'; this.onerror=function(){ this.src='{% url 'generate_placeholder' product.id %}'; }"
+         loading="lazy" decoding="async">
+  {% else %}
+    <img src="{% url 'generate_placeholder' product.id %}" alt="{{ product.name }}" class="product-image" loading="lazy" decoding="async">
+  {% endif %}
+
+  <div class="card-body">
+    <p class="category">{{ product.category }}</p>
+    <h3 class="name">{{ product.name }}</h3>
+    <p class="brand">by <strong>{{ product.brand }}</strong></p>
+    <div class="price-row">
+      <span class="label">From</span>
+      <span class="price">${{ product.cheapest_price|default:"0.00" }}</span>
+    </div>
+    <div class="store-row">
+      <span class="label">on</span>
+      <span class="store">{{ product.cheapest_platform|default:product.store }}</span>
+    </div>
+    <a class="cta" href="{% url 'product_detail' product.id %}">Compare Prices</a>
+  </div>
+</article>

@@ -1,0 +1,9 @@
+Pillow>=9.0.0
+ImageHash>=4.3
+requests>=2.28
+beautifulsoup4>=4.11
+numpy>=1.23
+tqdm>=4.64
+# Optional for embeddings (install if you have PyTorch or prefer CPU-only builds):
+# sentence-transformers
+# faiss-cpu  # optional for large-scale search

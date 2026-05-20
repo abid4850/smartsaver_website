@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="filters-panel auth-panel">
+    <p class="eyebrow">Account access</p>
+    <h1>Sign in to save your filters</h1>
+    <p class="lead">Use your account to keep personalized search filters and return to them instantly.</p>
+
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Sign In</button>
+    </form>
+</section>
+{% endblock %}

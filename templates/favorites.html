@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-panel">
+    <p class="eyebrow">Personal dashboard</p>
+    <h1>Pinned Favorites</h1>
+    <p class="lead">Your saved filters are pinned here for one-click reuse, copying, and sharing.</p>
+
+    <form class="search-form favorites-search" action="/favorites/" method="get">
+        <input type="text" name="q" placeholder="Search pinned filters" value="{{ query }}">
+        <select name="per_page" aria-label="Favorites per page">
+            {% for size in allowed_page_sizes %}
+                <option value="{{ size }}" {% if per_page == size %}selected{% endif %}>{{ size }} / page</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Search Favorites</button>
+        <button type="submit" name="reset_per_page" value="1">Reset Page Size</button>
+    </form>
+</section>
+
+<section>
+    <div class="section-head">
+        <h2>Favorite filters</h2>
+        <span>{% if query %}{{ total_favorites }} match{% if total_favorites != 1 %}es{% endif %}{% else %}{{ total_favorites }} pinned{% endif %}</span>
+    </div>
+
+    <div class="saved-filter-list card-grid">
+        {% for saved in favorites %}
+            <article class="saved-filter-item">
+                <div class="saved-filter-title-wrap">
+                    <a href="{{ saved.share_url }}">{{ saved.name }}</a>
+                    <span class="pin-badge">Pinned</span>
+                </div>
+
+                <div class="saved-filter-actions">
+                    <a class="ghost-button" href="{{ saved.share_url }}">Open</a>
+                    <button type="button" class="ghost-button" data-copy-url="{{ saved.share_url }}">Copy Link</button>
+                    <button type="button" class="ghost-button" data-share-title="{{ saved.name }}" data-share-url="{{ saved.share_url }}">Share</button>
+
+                    <form action="/filters/{{ saved.id }}/pin/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="/favorites/">
+                        <button type="submit" class="ghost-button">Unpin</button>
+                    </form>
+
+                    <form action="/filters/{{ saved.id }}/delete/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="/favorites/">
+                        <button type="submit" class="ghost-button danger">Delete</button>
+                    </form>
+                </div>
+            </article>
+        {% empty %}
+            <article class="product-card">
+                <h3>No pinned filters yet</h3>
+                <p>Pin any saved filter from Browse Deals to keep it here.</p>
+                <a class="button-link" href="/results/">Go to Browse Deals</a>
+            </article>
+        {% endfor %}
+    </div>
+
+    {% if page_obj and paginator.num_pages > 1 %}
+        <nav class="pagination" aria-label="Favorites pages">
+            {% if page_obj.has_previous %}
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{{ pagination_query }}">Previous</a>
+            {% endif %}
+
+            {% for number in paginator.page_range %}
+                {% if number == page_obj.number %}
+                    <span class="page-link active">{{ number }}</span>
+                {% elif number >= page_obj.number|add:"-2" and number <= page_obj.number|add:"2" %}
+                    <a class="page-link" href="?page={{ number }}{{ pagination_query }}">{{ number }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{{ pagination_query }}">Next</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}
