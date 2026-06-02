@@ -16,6 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import TemplateView
+from django.contrib.sitemaps.views import sitemap
+from products.sitemaps import StaticViewSitemap, ProductSitemap, NewsSitemap
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
@@ -28,6 +31,12 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('users/', include('users.urls')),
     path('', include('products.urls')),
+    path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+    path('sitemap.xml', sitemap, {'sitemaps': {
+        'static': StaticViewSitemap(),
+        'products': ProductSitemap(),
+        'news': NewsSitemap(),
+    }}, name='django.contrib.sitemaps.views.sitemap'),
 ]
 
 if settings.DEBUG:

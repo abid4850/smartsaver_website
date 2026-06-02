@@ -3,9 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SmartSaver | AI-Powered Price Intelligence & Deals{% endblock %}</title>
+    {% load static %}
+    <title>{% block title %}{{ SITE_NAME|default:'SmartSaver' }} | AI-Powered Price Intelligence & Deals{% endblock %}</title>
     <meta name="description" content="{% block description %}Compare prices across 1000+ stores, get instant alternatives, and save 40% on average. Real-time price tracking for smart shoppers.{% endblock %}">
-    {% block og_tags %}{% endblock %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}" />
+    {% block og_tags %}
+    <meta property="og:site_name" content="{{ SITE_NAME|default:'SmartSaver' }}" />
+    <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+    <meta property="og:title" content="{% block og_title %}{{ SITE_NAME|default:'SmartSaver' }}{% endblock %}" />
+    <meta property="og:description" content="{% block og_description %}Compare prices across 1000+ stores and find the best deals.{% endblock %}" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    {% endblock %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
