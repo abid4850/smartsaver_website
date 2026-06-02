@@ -1,5 +1,45 @@
 {% extends "base.html" %}
 
+{% block title %}{{ product.name }} — {{ product.brand }} | {{ SITE_NAME|default:'SmartSaver' }}{% endblock %}
+{% block description %}{% if product.description %}{{ product.description|truncatechars:150 }}{% else %}Compare prices and find the best deals for {{ product.name }}{% endif %}{% endblock %}
+{% block og_tags %}
+        {% with img=product.get_image_url %}
+        <meta property="og:type" content="product">
+        <meta property="og:title" content="{{ product.name }}">
+        {% if product.description %}
+        <meta property="og:description" content="{{ product.description|truncatechars:160 }}">
+        {% else %}
+        <meta property="og:description" content="Find the best deals for {{ product.name }}">
+        {% endif %}
+        <meta property="og:image" content="{% if img|slice:":4" == 'http' %}{{ img }}{% else %}{{ SITE_URL }}{{ img }}{% endif %}">
+        <meta property="og:url" content="{{ request.build_absolute_uri }}">
+        <meta name="twitter:card" content="summary_large_image">
+        {% endwith %}
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": "{{ product.name|escapejs }}",
+            "image": ["{% if product.get_image_url|slice:":4" == 'http' %}{{ product.get_image_url }}{% else %}{{ SITE_URL }}{{ product.get_image_url }}{% endif %}"],
+            "description": "{{ product.description|striptags|truncatechars:300|escapejs }}",
+            "brand": { "@type": "Brand", "name": "{{ product.brand|escapejs }}" },
+            "offers": {
+                "@type": "Offer",
+                "priceCurrency": "USD",
+                {% if best_deal %}
+                "price": "{{ best_deal.price }}",
+                "availability": "https://schema.org/InStock",
+                "url": "{{ best_deal.product_url }}"
+                {% else %}
+                "price": "{{ product.cheapest_price|default:'' }}",
+                "availability": "https://schema.org/InStock",
+                "url": "{{ request.build_absolute_uri }}"
+                {% endif %}
+            }
+        }
+        </script>
+{% endblock %}
+
 {% block content %}
 <section class="detail-hero detail-hero-pro">
     <div class="detail-media">

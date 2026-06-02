@@ -1,0 +1,22 @@
+[Unit]
+Description=SmartSaver django-rq worker
+After=network.target redis.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/smartsaver/current
+EnvironmentFile=/etc/smartsaver/smartsaver.env
+ExecStart=/var/www/smartsaver/venv/bin/python manage.py rqworker default
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/www/smartsaver
+
+[Install]
+WantedBy=multi-user.target

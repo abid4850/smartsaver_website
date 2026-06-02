@@ -102,6 +102,12 @@ Then open `/admin/`.
 - For production, switch to PostgreSQL and configure Redis/Celery.
 - Current sample integration uses seeded data for reliable MVP validation.
 
+## Deployment (NGINX + HTTPS)
+
+- NGINX config (domain ready): `deployment/nginx/smartsaver.abidnexus.com.conf`
+- Let's Encrypt setup guide: `deployment/LETSENCRYPT_SETUP.md`
+- systemd units and env template: `deployment/systemd/`
+
 ## Environment
 
 Copy `.env.example` to `.env` (or set environment variables via your hosting platform). Important variables:

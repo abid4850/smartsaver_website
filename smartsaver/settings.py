@@ -158,3 +158,17 @@ RQ_QUEUES = {
 
 # SerpAPI key for guaranteed Google Images via SerpAPI (set in environment or here)
 SERPAPI_KEY = os.environ.get('SERPAPI_KEY', '')
+
+# Security settings (read from env for production)
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() in ('1', 'true', 'yes')
+SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', str(SECURE_SSL_REDIRECT)).lower() in ('1', 'true', 'yes')
+CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', str(SECURE_SSL_REDIRECT)).lower() in ('1', 'true', 'yes')
+SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'False').lower() in ('1', 'true', 'yes')
+SECURE_HSTS_PRELOAD = os.environ.get('SECURE_HSTS_PRELOAD', 'False').lower() in ('1', 'true', 'yes')
+SECURE_CONTENT_TYPE_NOSNIFF = os.environ.get('SECURE_CONTENT_TYPE_NOSNIFF', 'True').lower() in ('1', 'true', 'yes')
+SECURE_BROWSER_XSS_FILTER = os.environ.get('SECURE_BROWSER_XSS_FILTER', 'True').lower() in ('1', 'true', 'yes')
+SECURE_REFERRER_POLICY = os.environ.get('SECURE_REFERRER_POLICY', 'no-referrer-when-downgrade')
+
+# X-Frame-Options is set by default to 'DENY' via middleware, but can be overridden
+X_FRAME_OPTIONS = os.environ.get('X_FRAME_OPTIONS', 'DENY')

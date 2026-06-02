@@ -1,0 +1,23 @@
+[Unit]
+Description=SmartSaver Django via Gunicorn
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/smartsaver/current
+EnvironmentFile=/etc/smartsaver/smartsaver.env
+ExecStart=/var/www/smartsaver/venv/bin/gunicorn smartsaver.wsgi:application --bind 127.0.0.1:8000 --workers 3 --timeout 120 --access-logfile - --error-logfile -
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/www/smartsaver
+
+[Install]
+WantedBy=multi-user.target
