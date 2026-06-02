@@ -4,6 +4,7 @@ from django.templatetags.static import static
 import os
 from pathlib import Path
 from django.conf import settings
+import logging
 import requests
 from io import BytesIO
 from django.core.files.base import ContentFile
@@ -59,15 +60,15 @@ class Product(models.Model):
 		"""Generate a deterministic local filename from image_url."""
 		if not self.image_url:
 			return ""
-		# hash the URL to create a unique filename
-		hash_suffix = hashlib.md5(self.image_url.encode()).hexdigest()[:8]
+		# hash the URL to create a unique filename (use SHA-256 instead of MD5)
+		hash_suffix = hashlib.sha256(self.image_url.encode()).hexdigest()[:8]
 		return f"products/{self.id}_{hash_suffix}.jpg"
 
 	def _thumbnail_name(self, size_suffix: str) -> str:
 		"""Generate thumbnail filename."""
 		if not self.image_url:
 			return ""
-		hash_suffix = hashlib.md5(self.image_url.encode()).hexdigest()[:8]
+		hash_suffix = hashlib.sha256(self.image_url.encode()).hexdigest()[:8]
 		return f"products/{self.id}_{hash_suffix}_{size_suffix}.jpg"
 
 	def _is_placeholder_url(self, url: str) -> bool:
@@ -124,7 +125,8 @@ class Product(models.Model):
 				thumb_name = self._thumbnail_name(suffix)
 				self._save_image_variant(img, thumb_name, max_width=w)
 		except Exception:
-			# fail silently in dev if download/process fails
+			# Log the failure but don't raise (image processing should not break saves)
+			logging.exception("download_and_process_image failed for product %s", self.pk)
 			return
 
 	def _save_image_variant(self, img: "Image.Image", filename: str, max_width: int = None):
@@ -207,12 +209,12 @@ class Product(models.Model):
 				queue = django_rq.get_queue('default')
 				from products.tasks import process_product_image
 				queue.enqueue(process_product_image, self.id)
-			except Exception as e:
+			except Exception:
 				# fallback: run synchronously in dev (e.g., no Redis)
 				try:
 					self.download_and_process_image()
 				except Exception:
-					pass  # don't let image processing affect save operation
+					logging.exception("Synchronous image processing failed for product %s", self.pk)
 
 
 class ProductNews(models.Model):

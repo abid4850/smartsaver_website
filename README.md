@@ -39,7 +39,7 @@ python manage.py migrate
 python manage.py seed_data
 ```
 
-5. Auto-add more products from multiple marketplaces:
+5. Auto-add more products from multiple marketplaces with web image resolution:
 
 ```powershell
 python manage.py auto_add_products --markets amazon,ebay,bestbuy,newegg --count-per-market 10
@@ -59,6 +59,13 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install_auto_add_products_tas
 
 This creates a task named `SmartSaver-AutoAddProducts` that runs
 `scripts/run_auto_add_products.ps1` every day and writes logs to `logs/auto_add_products.log`.
+
+To refresh product images and import recent news stories with images from public feeds:
+
+```powershell
+python manage.py refresh_product_images --process
+python manage.py import_news_from_feeds --limit-per-feed 5
+```
 
 For weekly schedule (example: every Sunday at 02:00):
 
@@ -94,3 +101,13 @@ Then open `/admin/`.
 
 - For production, switch to PostgreSQL and configure Redis/Celery.
 - Current sample integration uses seeded data for reliable MVP validation.
+
+## Environment
+
+Copy `.env.example` to `.env` (or set environment variables via your hosting platform). Important variables:
+
+- `DJANGO_SECRET_KEY`: set a strong secret in production. If unset, the app will generate a secure local fallback for development.
+- `SERPAPI_KEY`: optional API key for SerpAPI image results.
+- `REDIS_URL`: URL for Redis when using `django_rq`.
+
+On deployment, ensure `DEBUG=False` and `DJANGO_SECRET_KEY` is set.

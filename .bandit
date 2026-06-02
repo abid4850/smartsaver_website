@@ -1,0 +1,2 @@
+# Bandit config - exclude virtualenv and migrations to avoid scanning third-party packages
+exclude: .venv,migrations

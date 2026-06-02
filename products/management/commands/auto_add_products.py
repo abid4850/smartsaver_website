@@ -7,6 +7,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from comparisons.models import ProductPrice
 from products.models import Product
+from products.utils.web_image_resolver import resolve_product_image
 
 
 class Command(BaseCommand):
@@ -136,11 +137,14 @@ class Command(BaseCommand):
                     f"Auto-added product for marketplace comparison across "
                     f"{', '.join(item['markets'])}."
                 ),
-                "image_source": "fallback",
             }
+            resolved_image = resolve_product_image(item["name"], item["brand"], item["category"])
+            image_source = "web" if resolved_image else "fallback"
 
             if dry_run:
                 self.stdout.write(f"[DRY] product: {item['brand']} {item['name']}")
+                if resolved_image:
+                    self.stdout.write(f"[DRY]   image: {resolved_image}")
                 for market in item["markets"]:
                     if market in requested_markets:
                         price = self._price_for_market(Decimal(item["base_price"]), market, item["name"])
@@ -152,10 +156,8 @@ class Command(BaseCommand):
                 Product.objects.filter(pk=product.pk).update(
                     category=defaults["category"],
                     description=defaults["description"],
-                    image_source=defaults["image_source"],
-                    image_url=self._white_image(item["name"]),
+                    image_source=image_source,
                 )
-                product.refresh_from_db(fields=["id", "name", "brand"])
                 updated_products += 1
             else:
                 product = Product.objects.create(
@@ -163,10 +165,22 @@ class Command(BaseCommand):
                     brand=item["brand"],
                     category=defaults["category"],
                     description=defaults["description"],
-                    image_source=defaults["image_source"],
+                    image_source=image_source,
                 )
-                Product.objects.filter(pk=product.pk).update(image_url=self._white_image(item["name"]))
                 created_products += 1
+
+            if resolved_image:
+                Product.objects.filter(pk=product.pk).update(
+                    image_url=resolved_image,
+                    image_source=image_source,
+                )
+                product.image_url = resolved_image
+                product.image_source = image_source
+                try:
+                    product.download_and_process_image()
+                except Exception:
+                    import logging
+                    logging.exception("download_and_process_image failed for product %s", product.pk)
 
             for market in item["markets"]:
                 if market not in requested_markets:
@@ -241,7 +255,3 @@ class Command(BaseCommand):
         if pattern:
             return pattern.format(query=query)
         return f"https://www.google.com/search?q={query}"
-
-    def _white_image(self, product_name: str) -> str:
-        safe = "+".join(product_name.split())
-        return f"https://dummyimage.com/1200x1200/ffffff/0f172a.png&text={safe}"

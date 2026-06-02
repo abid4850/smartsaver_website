@@ -175,7 +175,7 @@ def generate_placeholder_view(request, product_id: int):
 	initials = ''.join([p[:1] for p in brand.split()][:2]).upper() or (brand[:2].upper() if brand else 'PR')
 	title = product.name or ''
 	# choose a simple palette from brand name hash
-	h = int(hashlib.md5((brand or '').encode('utf-8')).hexdigest()[:6], 16)
+	h = int(hashlib.sha256((brand or '').encode('utf-8')).hexdigest()[:6], 16)
 	color = f"#{(h & 0xFFFFFF):06x}"
 	bg = '#ffffff'
 

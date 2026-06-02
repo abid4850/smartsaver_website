@@ -88,7 +88,8 @@ class Command(BaseCommand):
                     try:
                         item.generate_thumbnails()
                     except Exception:
-                        pass
+                        import logging
+                        logging.exception("generate_thumbnails failed for %s", item.slug)
                     self.stdout.write(f"Created placeholder for: {item.slug} -> {filename}")
                     count += 1
                 except Exception as e:
