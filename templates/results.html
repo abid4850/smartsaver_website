@@ -137,11 +137,7 @@
         {% for product in products %}
             <article class="product-card">
                 <div class="product-image-wrap">
-                    {% if product.image_url %}
-                        <img src="{{ product.get_image_url }}" srcset="{{ product.get_image_srcset }}" alt="{{ product.name }}" class="product-image" loading="lazy" decoding="async" sizes="(max-width: 600px) 100vw, 300px" onerror="this.onerror=null;this.src='/static/smartsaver/product-placeholder.svg';">
-                    {% else %}
-                        <img src="/static/smartsaver/product-placeholder.svg" alt="{{ product.name }}" class="product-image product-image-fallback" loading="lazy" decoding="async">
-                    {% endif %}
+                    <img src="{{ product.get_image_url }}" srcset="{{ product.get_image_srcset }}" alt="{{ product.name }}" class="product-image" loading="lazy" decoding="async" sizes="(max-width: 600px) 100vw, 300px" onerror="this.onerror=null;this.src='/static/smartsaver/product-placeholder.svg';">
                 </div>
                 <div class="product-content">
                     <p class="card-category">{{ product.category }}</p>

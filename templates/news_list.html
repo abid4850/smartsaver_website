@@ -36,7 +36,7 @@
         {% for item in news_items %}
             <article class="news-card">
                 <div class="news-image-wrap">
-                    <img src="{{ request.scheme }}://{{ request.get_host }}{{ item.get_image_url }}" srcset="{{ item.get_image_srcset }}" sizes="(max-width:900px) 100vw, 420px" alt="{{ item.title }}" class="news-image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/static/smartsaver/news-general.svg';">
+                    <img src="{{ item.get_image_url }}" srcset="{{ item.get_image_srcset }}" sizes="(max-width:900px) 100vw, 420px" alt="{{ item.title }}" class="news-image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/static/smartsaver/news-general.svg';">
                     <span class="news-badge">{{ item.news_category|title }}</span>
                 </div>
                 <div class="news-content">

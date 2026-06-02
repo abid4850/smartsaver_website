@@ -1,13 +1,10 @@
 <article class="product-card" data-id="{{ product.id }}">
-  {% if product.image_url %}
-    <img src="{{ product.image_url }}"
-         alt="{{ product.name }}"
-         class="product-image"
-         onerror="this.onerror=null; this.src='{{ product.fallback_url }}'; this.onerror=function(){ this.src='{% url 'generate_placeholder' product.id %}'; }"
-         loading="lazy" decoding="async">
-  {% else %}
-    <img src="{% url 'generate_placeholder' product.id %}" alt="{{ product.name }}" class="product-image" loading="lazy" decoding="async">
-  {% endif %}
+  <img src="{{ product.get_image_url }}"
+       srcset="{{ product.get_image_srcset }}"
+       alt="{{ product.name }}"
+       class="product-image"
+       onerror="this.onerror=null; this.src='{{ product.fallback_url }}';"
+       loading="lazy" decoding="async">
 
   <div class="card-body">
     <p class="category">{{ product.category }}</p>

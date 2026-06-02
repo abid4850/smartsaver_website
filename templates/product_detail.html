@@ -3,11 +3,7 @@
 {% block content %}
 <section class="detail-hero detail-hero-pro">
     <div class="detail-media">
-        {% if product.image_url %}
-            <img src="{{ product.get_image_url }}" srcset="{{ product.get_image_srcset }}" alt="{{ product.name }}" class="detail-hero-image" loading="lazy" decoding="async" sizes="(max-width: 600px) 100vw, 800px" onerror="this.onerror=null;this.src='/static/smartsaver/product-placeholder.svg';">
-        {% else %}
-            <img src="/static/smartsaver/product-placeholder.svg" alt="{{ product.name }}" class="detail-hero-image" loading="lazy" decoding="async">
-        {% endif %}
+        <img src="{{ product.get_image_url }}" srcset="{{ product.get_image_srcset }}" alt="{{ product.name }}" class="detail-hero-image" loading="lazy" decoding="async" sizes="(max-width: 600px) 100vw, 800px" onerror="this.onerror=null;this.src='/static/smartsaver/product-placeholder.svg';">
     </div>
 
     <div class="detail-copy">
@@ -82,11 +78,7 @@
         {% for item in alternatives %}
             <article class="product-card">
                 <div class="product-image-wrap">
-                    {% if item.alternative_product.image_url %}
-                        <img src="{{ item.alternative_product.get_image_url }}" srcset="{{ item.alternative_product.get_image_srcset }}" alt="{{ item.alternative_product.name }}" class="product-image" loading="lazy" decoding="async" sizes="(max-width: 600px) 100vw, 300px" onerror="this.onerror=null;this.src='/static/smartsaver/product-placeholder.svg';">
-                    {% else %}
-                        <img src="/static/smartsaver/product-placeholder.svg" alt="{{ item.alternative_product.name }}" class="product-image product-image-fallback" loading="lazy" decoding="async">
-                    {% endif %}
+                    <img src="{{ item.alternative_product.get_image_url }}" srcset="{{ item.alternative_product.get_image_srcset }}" alt="{{ item.alternative_product.name }}" class="product-image" loading="lazy" decoding="async" sizes="(max-width: 600px) 100vw, 300px" onerror="this.onerror=null;this.src='/static/smartsaver/product-placeholder.svg';">
                 </div>
                 <div class="product-content">
                     <p class="card-category">{{ item.similarity_score|floatformat:0 }}% Match</p>
